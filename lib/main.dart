@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,7 +30,6 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     _pages = [
-      Center(child: Text("Map Page")),
       Center(child: Text("Home Page")),
       Center(child: Text("Post Page")),
     ];
@@ -48,17 +49,7 @@ class _HomeState extends State<Home> {
         child: ListView(
           children: [
             DrawerHeader(
-              child: SizedBox(
-                height: 260,
-                child: DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: Color(0xFFFFB81C),
-                  ),
-                  child: Column(
-                    //! make a widget that adds a round profile picture picker, alr have one in inventory app
-                  ),
-                ),
-              ),
+              child: ProfileImagePicker(), // Use the widget here
             ),
             ListTile(
               leading: Icon(Icons.account_circle),
@@ -80,11 +71,11 @@ class _HomeState extends State<Home> {
               onTap: () {
                 Navigator.pop(context);
               },
-            ),
+            )
           ],
         ),
       ),
-      body: _pages[_selectedIndex], // <-- Use the selected page here
+      body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -106,5 +97,44 @@ class _HomeState extends State<Home> {
     );
   }
 }
+
+// Move this outside of _HomeState
+class ProfileImagePicker extends StatefulWidget {
+  const ProfileImagePicker({super.key});
+
+  @override
+  ProfileImagePickerState createState() => ProfileImagePickerState();
+}
+
+class ProfileImagePickerState extends State<ProfileImagePicker> {
+  File? _image;
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _pickImage,
+      child: CircleAvatar(
+        radius: 40,
+        backgroundColor: Colors.red,
+        backgroundImage: _image != null ? FileImage(_image!) : null,
+        child: _image == null
+            ? Icon(Icons.person, size: 40, color: Colors.white)
+            : null,
+      ),
+    );
+  }
+}
+
 
 
